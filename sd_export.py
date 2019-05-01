@@ -59,8 +59,7 @@ def create_sd(table):
     # Create a new SDDraft and stage to SD
     sddraft = str(table) + '.sddraft'
     sd = str(table) + '.sd'
-    draft = mp.getWebLayerSharingDraft('HOSTING_SERVER', 'FEATURE', table)
-    draft.exportToSDDraft(sddraft)
+    arcpy.mp.CreateWebLayerSDDraft(prj_mp, sddraft, prj_mp.name, "MY_HOSTED_SERVICES", "FEATURE_ACCESS")
     arcpy.StageService_server(sddraft, sd)
     os.remove(sddraft)
 
@@ -86,22 +85,25 @@ prjPath = config.get('local', 'prjPath')
 # Get a list of the .aprx files to stage the services
 aprx_files = glob.glob(prjPath)
 
+# For some reason SDDraft tool needs an explicit arcpy AGO login now
+arcpy.SignInToPortal(portal, user, password)
+
 # Define the AGO organization to connect to
 gis = GIS(portal, user, password, proxy_host=proxy, proxy_port=8080)
 
 # Files have to be created sequentially because ArcGIS Pro doesn't like multiprocessing
 for aprx in aprx_files:
     prj = arcpy.mp.ArcGISProject(aprx)
-    mp = prj.listMaps()[0]
+    prj_mp = prj.listMaps()[0]
     try:
-        if checks(mp):
-            print(mp.name)
-            create_sd(mp.name)
-            logger.info('{} service definition successfully created.'.format(mp.name))
+        if checks(prj_mp):
+            print(prj_mp.name)
+            create_sd(prj_mp.name)
+            logger.info('{} service definition successfully created.'.format(prj_mp.name))
         else:
-            logger.error('{} schema did not match or record count was 0.'.format(mp.name))
-            email_body = "{} service failed to update in ArcGIS Online. Please see the log for details on server {}.".format(mp.name, socket.gethostbyname(socket.gethostname()))
+            logger.error('{} schema did not match or record count was 0.'.format(prj_mp.name))
+            email_body = "{} service failed to update in ArcGIS Online. Please see the log for details on server {}.".format(prj_mp.name, socket.gethostbyname(socket.gethostname()))
     except Exception as e:
-        logger.error(mp.name, e)
-        email_body = "{} service failed to update in ArcGIS Online. Please see the log for details on server {}.".format(mp.name, socket.gethostbyname(socket.gethostname()))
+        logger.error(prj_mp.name, e)
+        email_body = "{} service failed to update in ArcGIS Online. Please see the log for details on server {}.".format(prj_mp.name, socket.gethostbyname(socket.gethostname()))
         continue
