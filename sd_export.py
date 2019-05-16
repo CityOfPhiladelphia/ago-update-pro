@@ -103,7 +103,9 @@ for aprx in aprx_files:
         else:
             logger.error('{} schema did not match or record count was 0.'.format(prj_mp.name))
             email_body = "{} service failed to update in ArcGIS Online. Please see the log for details on server {}.".format(prj_mp.name, socket.gethostbyname(socket.gethostname()))
+            sendemail(email_sender, email_subject, email_body, email_recipients)
     except Exception as e:
         logger.error(prj_mp.name, e)
         email_body = "{} service failed to update in ArcGIS Online. Please see the log for details on server {}.".format(prj_mp.name, socket.gethostbyname(socket.gethostname()))
+        sendemail(email_sender, email_subject, email_body, email_recipients)
         continue
