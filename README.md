@@ -7,3 +7,5 @@ sd_export.py - exports a series of ArcGIS Online and ArcGIS Enterprise compatibl
 ago_upload_sd.py - uploads the exported service defition files to user defined portal (AGO or AGE) using multiprocessing, does not require Esri licensing
 
 These scripts currently run sequentially, but can be run independently of each other
+
+These user defined in the config file for the service definition upload must be the owner of the feature servcies.
