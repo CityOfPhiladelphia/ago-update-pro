@@ -35,13 +35,14 @@ def sendemail(sender, subject, text, recipientslist):
 
 
 def checks(mp):
-    # Get record count and schema of table to update
+    # Get record count and schema of table to update from data warehouse
     fc = mp.listLayers()[0].dataSource
     count = int(arcpy.GetCount_management(fc)[0])
     field_names = [f.name for f in arcpy.ListFields(fc)]
+    # Remove shape fields from list of fields because the won't match AGO shape fields
     shapes = [f.name for f in arcpy.ListFields(fc, 'shape*')]
     tbl_fields = sorted(set(field_names) - set(shapes))
-    # Get schema of table in AGO, remove *shape* fields from the schema check because they don't match between AGO and the warehouse
+    # Get schema of table in AGO
     fsItem = gis.content.search("title:{} AND owner:{}".format(mp.name, user), item_type="Feature Service")[0]
     layer = fsItem.layers[0]
     ago_fields = []
@@ -102,10 +103,10 @@ for aprx in aprx_files:
             logger.info('{} service definition successfully created.'.format(prj_mp.name))
         else:
             logger.error('{} schema did not match or record count was 0.'.format(prj_mp.name))
-            email_body = "{} service failed to update in ArcGIS Online. Please see the log for details on server {}.".format(prj_mp.name, socket.gethostbyname(socket.gethostname()))
+            email_body = "{} service definition failed to create. Please see the log for details on server {}.".format(prj_mp.name, socket.gethostbyname(socket.gethostname()))
             sendemail(email_sender, email_subject, email_body, email_recipients)
     except Exception as e:
         logger.error(prj_mp.name, e)
-        email_body = "{} service failed to update in ArcGIS Online. Please see the log for details on server {}.".format(prj_mp.name, socket.gethostbyname(socket.gethostname()))
+        email_body = "{} service definition failed to create. Please see the log for details on server {}.".format(prj_mp.name, socket.gethostbyname(socket.gethostname()))
         sendemail(email_sender, email_subject, email_body, email_recipients)
         continue
