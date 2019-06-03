@@ -7,6 +7,7 @@ from configparser import ConfigParser
 import logging
 import smtplib
 from email.mime.text import MIMEText
+import socket
 
 config = ConfigParser()
 config.read('ago_upload_config.ini')
@@ -84,5 +85,7 @@ if __name__ == '__main__':
         main()
     except Exception as e:
         logger.error('AGO upload failed: ' + str(e))
+        email_body = "AGO service definition upload failure. Please see the log for details on server {}.".format(socket.gethostbyname(socket.gethostname()))
+        sendemail(email_sender, email_subject, email_body, email_recipients)
     finish = datetime.now() - start
     logger.info('AGO upload complete in ' + str(finish))
