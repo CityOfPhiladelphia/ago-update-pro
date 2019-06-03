@@ -41,7 +41,7 @@ def checks(mp):
     field_names = [f.name for f in arcpy.ListFields(fc)]
     shapes = [f.name for f in arcpy.ListFields(fc, 'shape*')]
     tbl_fields = sorted(set(field_names) - set(shapes))
-    # Get schema of table in AGO
+    # Get schema of table in AGO, remove *shape* fields from the schema check because they don't match between AGO and the warehouse
     fsItem = gis.content.search("title:{} AND owner:{}".format(mp.name, user), item_type="Feature Service")[0]
     layer = fsItem.layers[0]
     ago_fields = []
